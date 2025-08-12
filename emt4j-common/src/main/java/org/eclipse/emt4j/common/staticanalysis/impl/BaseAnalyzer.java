@@ -104,20 +104,24 @@ abstract class BaseAnalyzer implements Analyzer {
         }
         SootMethod method = clinit.get();
         JimpleBody body = (JimpleBody) method.retrieveActiveBody();
-        Local targetLocal = null;
-        Unit targetUnit = null;
-        for (Unit unit : body.getUnits()) {
-            if (unit instanceof JAssignStmt) {
-                JAssignStmt assignStmt = (JAssignStmt) unit;
-                if (assignStmt.getLeftOp().equivTo(fieldRef)) {
-                    if (assignStmt.getRightOp() instanceof Local) targetLocal = (Local) assignStmt.getRightOp();
-                    targetUnit = unit;
-                    break;
+        try {
+            Local targetLocal = null;
+            Unit targetUnit = null;
+            for (Unit unit : body.getUnits()) {
+                if (unit instanceof JAssignStmt) {
+                    JAssignStmt assignStmt = (JAssignStmt) unit;
+                    if (assignStmt.getLeftOp().equivTo(fieldRef)) {
+                        if (assignStmt.getRightOp() instanceof Local) targetLocal = (Local) assignStmt.getRightOp();
+                        targetUnit = unit;
+                        break;
+                    }
                 }
             }
+            ExceptionalUnitGraph graph = ExceptionalUnitGraphFactory.createExceptionalUnitGraph(body);
+            SimpleLocalDefs localDefs = new SimpleLocalDefs(graph);
+            return getDefValues(localDefs, targetUnit, targetLocal);
+        } finally {
+            method.releaseActiveBody();
         }
-        ExceptionalUnitGraph graph = ExceptionalUnitGraphFactory.createExceptionalUnitGraph(body);
-        SimpleLocalDefs localDefs = new SimpleLocalDefs(graph);
-        return getDefValues(localDefs, targetUnit, targetLocal);
     }
 }
