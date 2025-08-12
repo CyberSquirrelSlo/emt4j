@@ -121,6 +121,7 @@ abstract class BaseAnalyzer implements Analyzer {
             SimpleLocalDefs localDefs = new SimpleLocalDefs(graph);
             return getDefValues(localDefs, targetUnit, targetLocal);
         } finally {
+            //
             method.releaseActiveBody();
         }
     }
